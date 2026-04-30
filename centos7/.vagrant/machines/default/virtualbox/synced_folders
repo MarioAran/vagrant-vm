@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/admin/Desktop/github/MarioCode/devops/centos7","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/admin/Desktop/github/vagrant-vm/centos7","disabled":false,"__vagrantfile":true}}}
