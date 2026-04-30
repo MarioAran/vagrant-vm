@@ -28,9 +28,10 @@ Este repositorio contiene dos entornos de desarrollo virtualizados con Vagrant:
 4. Inicia y habilita Apache
 
 ### Acceso
-```bash
+```bash 
 cd centos7-web/
 vagrant up
+```
 # Abrir navegador: http://localhost:8080
 
 
