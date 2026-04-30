@@ -15,24 +15,53 @@ Vagrant.configure("2") do |config|
   end
   #aprivisionamiento instalar docker e levantar contenedores 
   config.vm.provision "shell", inline: <<-SHELL
-    # Instalar Docker
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+    echo "=== Instalando Docker en Ubuntu 18.04 ==="
+    
+    # 1. Actualizar e instalar dependencias básicas
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+    
+    # 2. Agregar la clave GPG oficial de Docker (método legacy para Ubuntu 18.04)
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    
+    # 3. Agregar el repositorio (usando bionic directamente)
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \ bionic stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # 4. Verificar que el repositorio se agregó
+    sudo apt-get update
+    
+    # 5. Instalar Docker (solo paquetes oficiales)
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    
+    # 6. Crear y agregar usuario al grupo docker
+    sudo groupadd docker || true
     sudo usermod -aG docker vagrant
     
-    # Instalar Docker Compose V2
-    sudo apt-get update
-    sudo apt-get install -y docker-compose-plugin
+    # 7. Verificar instalación
+    docker --version
+    docker compose version
     
-    # Descargar y ejecutar WordPress
+    echo "=== Instalando WordPress ==="
+    
+    # 8. Descargar y preparar WordPress
     cd /home/vagrant
+    
+    # Descargar docker-compose.yml
     sudo -u vagrant curl -o docker-compose.yml https://raw.githubusercontent.com/MarioAran/MarioCode/master/docker/docker-compose.yml
-    sudo -u vagrant docker compose up -d
-
+    
+    # Corregir volúmenes (eliminar ~/Desktop/)
+    sudo -u vagrant sed -i 's|~/Desktop/wordpress/db_data|./db_data|g' docker-compose.yml
+    sudo -u vagrant sed -i 's|~/Desktop/wordpress/wordpress_data|./wordpress_data|g' docker-compose.yml
+    
+    # Levantar WordPress
+    sudo su - vagrant -c "cd /home/vagrant && docker compose up -d"
+    
     echo "========================================="
-    echo "✅ Instalación completada!"
-    echo "📱 Accede a WordPress en: http://localhost:8000"
-    echo "   o en: http://192.168.55.10:8000"
+    echo "Instalación completada!"
+    echo "Accede a WordPress en: http://localhost:8000"
+    echo "Accede a WordPress en: http://192.168.55.10:8000"
     echo "========================================="
-  SHELL
+SHELL
 end
+
