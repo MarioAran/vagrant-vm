@@ -1,30 +1,45 @@
 terraform {
-  required_version = "~>= 1.0"
+  required_version = ">= 1.0"
+  
+  required_providers {
+    null = {
+      source = "hashicorp/null"
+      version = "~> 3.0"
+    }
+    local = {
+      source = "hashicorp/local"
+      version = "~> 2.0"
+    }
+  }
 }
 
 resource "null_resource" "vagrant_vm" {
-    triggers = {
-      box = var.vm_box
-      hostname = var.vm_hostname
-      memory = var.vm_memory
-      cpus = var.vm_cpus
-      ports = jsonencode(var.forwarded_ports)
-    }
+  triggers = {
+    box      = var.vm_box
+    hostname = var.vm_hostname
+    memory   = var.vm_memory
+    cpus     = var.vm_cpus
+    ports    = jsonencode(var.forwarded_ports)
+  }
+
   provisioner "local-exec" {
     command = <<-EOF
-        echo "creando VM con vagrant"
-        vagrant up --provider=virtualbox
-        echo "VM creada"
+      echo "📦 Creando VM con Vagrant..."
+      vagrant up --provider=virtualbox
+      echo "✅ VM creada"
     EOF
   }
+
   provisioner "local-exec" {
+    when    = destroy
     command = <<-EOF
-    echo "eliminando VM...."
-    vagrant destroy -f 
-    echo "VM Eliminada"
+      echo "🗑️ Eliminando VM..."
+      vagrant destroy -f
+      echo "✅ VM eliminada"
     EOF
   }
 }
+
 resource "local_file" "vagrantfile" {
   depends_on = []
   
@@ -39,8 +54,15 @@ resource "local_file" "vagrantfile" {
 }
 
 data "local_file" "ansible_playbook" {
-    depends_on = [null_resource.vagrant_vm]
-    filename = var.ansible_playbook_path
+  depends_on = [null_resource.vagrant_vm]
+  filename   = var.ansible_playbook_path
+  
+  lifecycle {
+    precondition {
+      condition     = fileexists(var.ansible_playbook_path)
+      error_message = "El playbook de Ansible no existe en: ${var.ansible_playbook_path}"
+    }
+  }
 }
 
 data "external" "vm_ip" {

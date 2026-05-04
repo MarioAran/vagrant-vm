@@ -6,19 +6,28 @@ variable "vm_box" {
 variable "vm_hostname" {
     description = "hostname de la maquina"
     type        = string
-    default     = "devops_lab"
+    default     = "devops-lab"
 }
 
 variable "vm_memory" {
     description = "RAM dedicada"
     type = number
     default = 4096
+    validation {
+      condition = var.vm_memory >= 512 && var.vm_memory <=16384
+      error_message = "la memoria debe estar entre 512MB y 16384MB "
+    }
 }
 
 variable "vm_cpus" {
     description = "cpus dedicadas"
     type = number
     default = 2  
+    validation {
+      condition = var.vm_cpus >=2 && var.vm_cpus <=4
+      error_message = "el numero de cpus tiene que estar entre 2 y 4"
+
+    }
 }
 
 variable "forwarded_ports" {
@@ -37,5 +46,5 @@ variable "forwarded_ports" {
 variable "ansible_playbook_path" {
     description = "playbook de ansible"
     type = string
-    default = "${path.module/ansible/playbook.yml}" 
+    default = "${path.module}/ansible/playbook.yml" 
 }
