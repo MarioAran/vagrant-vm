@@ -1,62 +1,69 @@
 terraform {
-  required_providers {
-    vagrant= {
-        source = "bpg/vagrant"
-        version = "~> 2.0"
+  required_version = "~>= 1.0"
+}
+
+resource "null_resource" "vagrant_vm" {
+    triggers = {
+      box = var.vm_box
+      hostname = var.vm_hostname
+      memory = var.vm_memory
+      cpus = var.vm_cpus
+      ports = jsonencode(var.forwarded_ports)
     }
+  provisioner "local-exec" {
+    command = <<-EOF
+        echo "creando VM con vagrant"
+        vagrant up --provider=virtualbox
+        echo "VM creada"
+    EOF
+  }
+  provisioner "local-exec" {
+    command = <<-EOF
+    echo "eliminando VM...."
+    vagrant destroy -f 
+    echo "VM Eliminada"
+    EOF
   }
 }
-
-variable "box_name" {
-    description = "ubuntu18"
-    default = "ubuntu/bionic64"
-}
-
-variable "vm_hostname" {
-    description = "Hostname de la VM"
-    default = "devops lab"
-
-}
-
-variable "memory" {
-    description = "RAM en MB"
-    default = 4096  
-}
-
-variable "cpus" {
-    description = "Cpus dedicadas"
-    default = 2
+resource "local_file" "vagrantfile" {
+  depends_on = []
   
+  content = templatefile("${path.module}/vagrantfile.tpl", {
+    box      = var.vm_box
+    hostname = var.vm_hostname
+    memory   = var.vm_memory
+    cpus     = var.vm_cpus
+    ports    = var.forwarded_ports
+  })
+  filename = "${path.module}/Vagrantfile"
 }
 
-resource "vagrant_box" "devops_vm" {
-    source = var.box_name
-    name = var.vm_hostname
+data "local_file" "ansible_playbook" {
+    depends_on = [null_resource.vagrant_vm]
+    filename = var.ansible_playbook_path
+}
 
+data "external" "vm_ip" {
+  depends_on = [null_resource.vagrant_vm]
+
+  program = ["bash", "-c", <<-EOF
+    cd "${path.module}"
     
-    providers = {
-        virtualbox = { 
-            memory = var.memory
-            cpus = var.cpus
-        forwarded_ports = [
-            {
-                guest = 8080 
-                host = 8080
-            },
-            {
-                guest = 30080
-                host = 30080
-            },
-            {
-                guest = 30030
-                host = 30030
-            },
-            {
-                guest = 6443
-                host = 6443
-            }
-        ]
-        }
-    }
+    # Esperar hasta que la VM esté lista (máximo 30 segundos)
+    for i in {1..30}; do
+      if vagrant ssh-config &>/dev/null; then
+        break
+      fi
+      sleep 1
+    done
+    
+    IP=$(vagrant ssh-config 2>/dev/null | grep -i "HostName" | awk '{print $2}')
+    
+    if [ -z "$IP" ]; then
+      IP="127.0.0.1"
+    fi
+    
+    echo "{\"ip\": \"$IP\"}"
+  EOF
+  ]
 }
-
