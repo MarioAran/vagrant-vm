@@ -1,0 +1,155 @@
+---
+- name: Configurar VM DevOps
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    # 1. ESPERAR Y PREPARAR
+    - name: Esperar a que el sistema esté disponible
+      wait_for_connection:
+        timeout: 300
+      become: no
+
+    - name: Actualizar apt cache
+      raw: apt-get update -y
+      changed_when: false
+
+    - name: Instalar Python y paquetes esenciales
+      raw: apt-get install -y python3 python3-apt python3-pip curl wget git htop
+      changed_when: false
+
+    - name: Recopilar facts del sistema
+      setup:
+
+    # 2. LIMPIAR CONFIGURACIONES PREVIAS DE DOCKER
+    - name: Eliminar configuraciones antiguas de Docker
+      shell: |
+        rm -f /etc/apt/sources.list.d/docker.list
+        rm -f /etc/apt/keyrings/docker.asc
+        rm -f /usr/share/keyrings/docker-archive-keyring.gpg
+      changed_when: false
+
+    # 3. DOCKER (instalación limpia)
+    - name: Instalar dependencias de Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Crear directorio para keyrings
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Añadir clave GPG de Docker
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      changed_when: false
+
+    - name: Añadir repositorio de Docker
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      changed_when: false
+
+    - name: Actualizar apt con repositorio de Docker
+      apt:
+        update_cache: yes
+
+    - name: Instalar Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Añadir usuario vagrant al grupo docker
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+    - name: Habilitar Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    # 4. KUBECTL
+    - name: Instalar kubectl
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+
+    # 5. K3s
+    - name: Instalar K3s
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Esperar a que K3s esté listo
+      wait_for:
+        port: 6443
+        host: localhost
+        timeout: 120
+
+    - name: Copiar kubeconfig
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+        group: vagrant
+        mode: '600'
+
+    # 6. JENKINS
+    - name: Instalar Java
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: Añadir clave GPG de Jenkins
+      shell: |
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+        echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+      args:
+        creates: /etc/apt/sources.list.d/jenkins.list
+
+    - name: Instalar Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Arrancar Jenkins
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Esperar a Jenkins
+      wait_for:
+        port: 8080
+        host: localhost
+        timeout: 60
+
+    # 7. HELM
+    - name: Instalar Helm
+      shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    # 8. MOSTRAR CONTRASEÑA
+    - name: Mostrar contraseña de Jenkins
+      debug:
+        msg: "🔑 Contraseña Jenkins: {{ lookup('file', '/var/lib/jenkins/secrets/initialAdminPassword', errors='ignore') }}"
