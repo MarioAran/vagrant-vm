@@ -127,42 +127,6 @@
         mode: '0755'
         owner: vagrant
 
-    # 6. JENKINS
-    - name: Instalar Java
-      apt:
-        name: openjdk-11-jdk
-        state: present
-
-    - name: Añadir clave GPG de Jenkins
-      shell: |
-        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-        echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-      args:
-        creates: /etc/apt/sources.list.d/jenkins.list
-
-    - name: Instalar Jenkins
-      apt:
-        name: jenkins
-        state: present
-
-    - name: Arrancar Jenkins
-      systemd:
-        name: jenkins
-        state: started
-        enabled: yes
-
-    - name: Esperar a Jenkins
-      wait_for:
-        port: 8080
-        host: localhost
-        timeout: 60
-
-    # 7. HELM
-    - name: Instalar Helm
-      shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      args:
-        creates: /usr/local/bin/helm
-
     # 8. MOSTRAR CONTRASEÑA
     - name: Mostrar contraseña de Jenkins
       debug:
