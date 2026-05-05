@@ -1,7 +1,8 @@
 variable "vm_box" {
     description = "box de vagrant a utilizar "
     type        = string
-    default     = "ubuntu/bionic64"
+    default     = "ubuntu/focal64"  # Ubuntu 20.04
+
 }
 variable "vm_hostname" {
     description = "hostname de la maquina"
@@ -25,7 +26,7 @@ variable "vm_cpus" {
     default = 2  
     validation {
       condition = var.vm_cpus >=2 && var.vm_cpus <=4
-      error_message = "el numero de cpus tiene que estar entre 2 y 4"
+      error_message = "el numero de cpus tiene que estar entre 2 y 5 "
 
     }
 }
@@ -44,7 +45,7 @@ variable "forwarded_ports" {
   ]
 }
 variable "ansible_playbook_path" {
-    description = "playbook de ansible"
-    type = string
-    default = "${path.module}/ansible/playbook.yml" 
+  description = "playbook de ansible"
+  type        = string
+  default     = "../ansible/playbook.yml"  # ✅ Ruta relativa simple
 }

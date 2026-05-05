@@ -25,7 +25,8 @@ resource "null_resource" "vagrant_vm" {
   provisioner "local-exec" {
     command = <<-EOF
       echo "📦 Creando VM con Vagrant..."
-      vagrant up --provider=virtualbox
+      cd ${path.module}/..
+      vagrant up --provider=virtualbox --provision
       echo "✅ VM creada"
     EOF
   }
@@ -34,8 +35,15 @@ resource "null_resource" "vagrant_vm" {
     when    = destroy
     command = <<-EOF
       echo "🗑️ Eliminando VM..."
-      vagrant destroy -f
-      echo "✅ VM eliminada"
+      cd ${path.module}/..
+      if [ -f Vagrantfile ]; then
+        vagrant destroy -f
+        rm -f Vagrantfile
+        rm -rf .vagrant
+        echo "✅ VM eliminada"
+      else
+        echo "⚠️ No se encontró Vagrantfile, VM no existe"
+      fi
     EOF
   }
 }
@@ -43,14 +51,14 @@ resource "null_resource" "vagrant_vm" {
 resource "local_file" "vagrantfile" {
   depends_on = []
   
-  content = templatefile("${path.module}/vagrantfile.tpl", {
+  content = templatefile("${path.module}/../vagrantfile.tpl", {
     box      = var.vm_box
     hostname = var.vm_hostname
     memory   = var.vm_memory
     cpus     = var.vm_cpus
     ports    = var.forwarded_ports
   })
-  filename = "${path.module}/Vagrantfile"
+  filename = "${path.module}/../Vagrantfile"  # Escribe en la carpeta padre
 }
 
 data "local_file" "ansible_playbook" {
@@ -69,23 +77,7 @@ data "external" "vm_ip" {
   depends_on = [null_resource.vagrant_vm]
 
   program = ["bash", "-c", <<-EOF
-    cd "${path.module}"
-    
-    # Esperar hasta que la VM esté lista (máximo 30 segundos)
-    for i in {1..30}; do
-      if vagrant ssh-config &>/dev/null; then
-        break
-      fi
-      sleep 1
-    done
-    
-    IP=$(vagrant ssh-config 2>/dev/null | grep -i "HostName" | awk '{print $2}')
-    
-    if [ -z "$IP" ]; then
-      IP="127.0.0.1"
-    fi
-    
-    echo "{\"ip\": \"$IP\"}"
+    echo "{\"ip\": \"192.168.56.10\"}"
   EOF
   ]
 }
