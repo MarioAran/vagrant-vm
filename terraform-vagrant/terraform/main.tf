@@ -33,17 +33,13 @@ resource "null_resource" "vagrant_vm" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = <<-EOF
-      echo "🗑️ Eliminando VM..."
-      cd ${path.module}/..
-      if [ -f Vagrantfile ]; then
-        vagrant destroy -f
+      command = <<-EOF
+        echo "🗑️ Eliminando VM..."
+        cd ${path.module}/..
+        vagrant global-status | grep "terraform-vagrant" | awk '{print $1}' | xargs -I{} vagrant destroy -f {}
         rm -f Vagrantfile
         rm -rf .vagrant
         echo "✅ VM eliminada"
-      else
-        echo "⚠️ No se encontró Vagrantfile, VM no existe"
-      fi
     EOF
   }
 }

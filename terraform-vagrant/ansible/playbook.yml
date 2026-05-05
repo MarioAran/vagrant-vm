@@ -7,12 +7,6 @@
     ansible_python_interpreter: /usr/bin/python3
 
   tasks:
-    # 1. ESPERAR Y PREPARAR
-    - name: Esperar a que el sistema esté disponible
-      wait_for_connection:
-        timeout: 300
-      become: no
-
     - name: Actualizar apt cache
       raw: apt-get update -y
       changed_when: false
@@ -97,6 +91,7 @@
         curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
       args:
         creates: /usr/local/bin/k3s
+      register: k3s_install
 
     - name: Esperar a que K3s esté listo
       wait_for:
@@ -104,7 +99,16 @@
         host: localhost
         timeout: 120
 
-    - name: Copiar kubeconfig
+    # Estas tareas van DESPUÉS de instalar K3s
+    - name: Crear directorio .kube para vagrant
+      file:
+        path: /home/vagrant/.kube
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+
+    - name: Copiar kubeconfig al home de vagrant
       copy:
         src: /etc/rancher/k3s/k3s.yaml
         dest: /home/vagrant/.kube/config
@@ -112,6 +116,16 @@
         owner: vagrant
         group: vagrant
         mode: '600'
+
+    - name: Crear script de kubeconfig para el host
+      copy:
+        content: |
+          #!/bin/bash
+          vagrant ssh -c "sudo cat /etc/rancher/k3s/k3s.yaml" > kubeconfig.yaml
+          echo "✅ kubeconfig exportado a kubeconfig.yaml"
+        dest: /home/vagrant/export_kubeconfig.sh
+        mode: '0755'
+        owner: vagrant
 
     # 6. JENKINS
     - name: Instalar Java
