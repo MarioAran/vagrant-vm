@@ -26,7 +26,7 @@ resource "null_resource" "vagrant_vm" {
     command = <<-EOF
       echo "📦 Creando VM con Vagrant..."
       cd ${path.module}/..
-      vagrant up --provider=virtualbox --provision
+      vagrant up
       echo "✅ VM creada"
     EOF
   }
@@ -60,19 +60,6 @@ resource "local_file" "vagrantfile" {
   })
   filename = "${path.module}/../Vagrantfile"  # Escribe en la carpeta padre
 }
-
-data "local_file" "ansible_playbook" {
-  depends_on = [null_resource.vagrant_vm]
-  filename   = var.ansible_playbook_path
-  
-  lifecycle {
-    precondition {
-      condition     = fileexists(var.ansible_playbook_path)
-      error_message = "El playbook de Ansible no existe en: ${var.ansible_playbook_path}"
-    }
-  }
-}
-
 data "external" "vm_ip" {
   depends_on = [null_resource.vagrant_vm]
 
