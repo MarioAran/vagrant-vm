@@ -61,10 +61,10 @@ The following tools were used in this project:
 
 you need to have 
 - [Git](https://git-scm.com)
-- [terraform required_version = ">= 1.0"] (https://developer.hashicorp.com/terraform/install)
-- [vagrant version "=>2.4.9"] (https://developer.hashicorp.com/vagrant/install)
-- [ansible version = "core> 2.19.8"] (https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html#id12)
-- [docker version "=> 24.0.6"] (https://docs.docker.com/engine/install/)
+- [terraform version">= 1.0"](https://developer.hashicorp.com/terraform/install)
+- [Vagrant   version "=>2.4.9"](https://developer.hashicorp.com/vagrant/install)
+- [Ansible   version = "core> 2.19.8"](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html#id12)
+- [Docker    version "=> 24.0.6"](https://docs.docker.com/engine/install/)
  
 ## :checkered_flag: Starting ##
 
