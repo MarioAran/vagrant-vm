@@ -3,18 +3,18 @@ terraform {
   
   required_providers {
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
       version = "~> 3.0"
     }
     local = {
-      source = "hashicorp/local"
+      source  = "hashicorp/local"
       version = "~> 2.0"
     }
   }
 }
 
 resource "null_resource" "vagrant_vm" {
-  triggers = {
+  triggers   = {
     box      = var.vm_box
     hostname = var.vm_hostname
     memory   = var.vm_memory
@@ -32,7 +32,7 @@ resource "null_resource" "vagrant_vm" {
   }
 
   provisioner "local-exec" {
-    when    = destroy
+    when      = destroy
       command = <<-EOF
         echo "🗑️ Eliminando VM..."
         cd ${path.module}/..
@@ -58,8 +58,7 @@ resource "local_file" "vagrantfile" {
 }
 data "external" "vm_ip" {
   depends_on = [null_resource.vagrant_vm]
-
-  program = ["bash", "-c", <<-EOF
+  program    = ["bash", "-c", <<-EOF
     echo "{\"ip\": \"192.168.56.10\"}"
   EOF
   ]
