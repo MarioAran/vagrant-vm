@@ -61,14 +61,14 @@ you need to have
 - 
 
 ## 🏗️ Architecture
-mac 
-↓
-Terraform → Vagrant → VirtualBox → VM Ubuntu 
-↓
-Ansible
-↓
-Docker
-↓
+- mac 
+-   ↓
+- Terraform → Vagrant → VirtualBox → VM Ubuntu 
+-   ↓
+- Ansible
+-   ↓
+- Docker
+
 ## :checkered_flag: Starting ##
 
 ```bash
