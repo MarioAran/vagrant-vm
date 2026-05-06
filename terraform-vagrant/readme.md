@@ -9,11 +9,13 @@
 <h1 align="center">Terraform Vagrant</h1>
 
 <p align="center">
-  <img alt="Github top language" src="https://img.shields.io/github/languages/top/MarioAran/terraform-vagrant?color=56BEB8">
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/MarioAran/terraform-vagrant?color=56BEB8">
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/MarioAran/terraform-vagrant?color=56BEB8">
-  <img alt="License" src="https://img.shields.io/github/license/MarioAran/terraform-vagrant?color=56BEB8">
+  ![Terraform](https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
+  ![Vagrant](https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white)
+  ![Ansible](https://img.shields.io/badge/ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
+  ![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+  ![WordPress](https://img.shields.io/badge/wordpress-21759B?style=for-the-badge&logo=wordpress&logoColor=white)
 </p>
+
 
 <!-- Status -->
 
@@ -58,11 +60,6 @@ you need to have
 - [Ansible    version "=> 2.19.8"](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html#id12)
 - [Docker     version "=> 24.0.6"](https://docs.docker.com/engine/install/)
 - 
-![Terraform](https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
-![Vagrant](https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white)
-![Ansible](https://img.shields.io/badge/ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![WordPress](https://img.shields.io/badge/wordpress-21759B?style=for-the-badge&logo=wordpress&logoColor=white)
 
 ## 🏗️ Architecture
 mac 
