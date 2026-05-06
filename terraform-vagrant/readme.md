@@ -1,8 +1,6 @@
 <div align="center" id="top"> 
   <img src="./.github/app.gif" alt="Terraform Vagrant" />
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  ![DevOps](https://img.shields.io/badge/DevOps-Terraform%20%7C%20Ansible%20%7C%20Docker-blue)
-  ![Version](https://img.shields.io/badge/version-1.0.0-green)
+
   &#xa0;
 
   <!-- <a href="https://terraformvagrant.netlify.app">Demo</a> -->
