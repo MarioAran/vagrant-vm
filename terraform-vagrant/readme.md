@@ -57,7 +57,21 @@ you need to have
 - [Vagrant    version "=> 2.4.9"](https://developer.hashicorp.com/vagrant/install)
 - [Ansible    version "=> 2.19.8"](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html#id12)
 - [Docker     version "=> 24.0.6"](https://docs.docker.com/engine/install/)
- 
+![Terraform](https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
+![Vagrant](https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white)
+![Ansible](https://img.shields.io/badge/ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![WordPress](https://img.shields.io/badge/wordpress-21759B?style=for-the-badge&logo=wordpress&logoColor=white)
+
+## 🏗️ Architecture
+mac 
+↓
+Terraform → Vagrant → VirtualBox → VM Ubuntu 
+↓
+Ansible
+↓
+Docker
+↓
 ## :checkered_flag: Starting ##
 
 ```bash
@@ -69,9 +83,9 @@ $ cd terraform-vagrant
 
 # init terraform
 $ cd terraform
-$ terraform initialize          # Inicializa el directorio y descarga los providers necesarios
+$ terraform init          # Inicializa el directorio y descarga los providers necesarios
 $ terraform validate            # Valida que la sintaxis de los archivos sea correcta
-$ teraform plan                 # Muestra los cambios que se van a realizar
+$ terraform plan                 # Muestra los cambios que se van a realizar
 
 # Run the project
 $ terraform apply -auto-approve # Crea/modifica la infraestructura
