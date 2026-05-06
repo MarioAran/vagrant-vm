@@ -58,7 +58,6 @@ you need to have
 - [Vagrant    version "=> 2.4.9"](https://developer.hashicorp.com/vagrant/install)
 - [Ansible    version "=> 2.19.8"](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html#id12)
 - [Docker     version "=> 24.0.6"](https://docs.docker.com/engine/install/)
-- 
 
 ## 🏗️ Architecture
 - mac 
