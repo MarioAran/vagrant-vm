@@ -8,13 +8,13 @@
 
 <h1 align="center">Terraform Vagrant</h1>
 
-<p align="center">
+
   ![Terraform](https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
   ![Vagrant](https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white)
   ![Ansible](https://img.shields.io/badge/ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
   ![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
   ![WordPress](https://img.shields.io/badge/wordpress-21759B?style=for-the-badge&logo=wordpress&logoColor=white)
-</p>
+
 
 
 <!-- Status -->
