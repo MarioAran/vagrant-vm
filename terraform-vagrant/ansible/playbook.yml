@@ -1,5 +1,5 @@
 ---
-- name: Configurar VM DevOps
+- name: Configurar VM DevOps con WordPress
   hosts: all
   become: yes
   gather_facts: no
@@ -18,15 +18,17 @@
     - name: Recopilar facts del sistema
       setup:
 
-    # 2. LIMPIAR CONFIGURACIONES PREVIAS DE DOCKER
+    # LIMPIAR CONFIGURACIONES PREVIAS DE DOCKER
     - name: Eliminar configuraciones antiguas de Docker
       shell: |
         rm -f /etc/apt/sources.list.d/docker.list
         rm -f /etc/apt/keyrings/docker.asc
         rm -f /usr/share/keyrings/docker-archive-keyring.gpg
+        rm -f /etc/apt/keyrings/docker.gpg
       changed_when: false
+      ignore_errors: yes
 
-    # 3. DOCKER (instalación limpia)
+    # INSTALAR DOCKER
     - name: Instalar dependencias de Docker
       apt:
         name:
@@ -65,9 +67,9 @@
           - docker-compose-plugin
         state: present
 
-    - name: Añadir usuario vagrant al grupo docker
+    - name: Añadir usuario al grupo docker
       user:
-        name: vagrant
+        name: "{{ ansible_user }}"
         groups: docker
         append: yes
 
@@ -77,57 +79,55 @@
         state: started
         enabled: yes
 
-    # 4. KUBECTL
-    - name: Instalar kubectl
-      shell: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-      args:
-        creates: /usr/local/bin/kubectl
+    # INSTALAR LIBRERÍA DE DOCKER PARA PYTHON
+    - name: Instalar docker-py (necesario para el módulo docker_compose)
+      pip:
+        name: docker
+        state: present
 
-    # 5. K3s
-    - name: Instalar K3s
-      shell: |
-        curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
-      args:
-        creates: /usr/local/bin/k3s
-      register: k3s_install
-
-    - name: Esperar a que K3s esté listo
-      wait_for:
-        port: 6443
-        host: localhost
-        timeout: 120
-
-    # Estas tareas van DESPUÉS de instalar K3s
-    - name: Crear directorio .kube para vagrant
+    # CONFIGURAR WORDPRESS
+    - name: Crear directorios para datos persistentes de WordPress
       file:
-        path: /home/vagrant/.kube
+        path: "/home/{{ ansible_user }}/Desktop/wordpress/{{ item }}"
         state: directory
-        owner: vagrant
-        group: vagrant
         mode: '0755'
+      loop:
+        - db_data
+        - wordpress_data
 
-    - name: Copiar kubeconfig al home de vagrant
-      copy:
-        src: /etc/rancher/k3s/k3s.yaml
-        dest: /home/vagrant/.kube/config
-        remote_src: yes
-        owner: vagrant
-        group: vagrant
-        mode: '600'
+    - name: Descargar docker-compose.yml desde repositorio
+      get_url:
+        url: https://raw.githubusercontent.com/MarioAran/MarioCode/master/docker/docker-compose.yml
+        dest: "/home/{{ ansible_user }}/docker-compose.yml"
+        mode: '0644'
 
-    - name: Crear script de kubeconfig para el host
-      copy:
-        content: |
-          #!/bin/bash
-          vagrant ssh -c "sudo cat /etc/rancher/k3s/k3s.yaml" > kubeconfig.yaml
-          echo "✅ kubeconfig exportado a kubeconfig.yaml"
-        dest: /home/vagrant/export_kubeconfig.sh
-        mode: '0755'
-        owner: vagrant
+    - name: Levantar los contenedores con Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{ ansible_user }}"
+        state: present
+      register: compose_output
 
-    # 8. MOSTRAR CONTRASEÑA
-    - name: Mostrar contraseña de Jenkins
+    - name: Esperar a que MySQL esté completamente listo
+      pause:
+        seconds: 20
+        prompt: "Esperando a que MySQL inicialice..."
+        
+    - name: Verificar que los contenedores están corriendo
+      command: docker ps 
+      register: containers_status
+      changed_when: false
+    
+    - name: Mostrar información de acceso
       debug:
-        msg: "🔑 Contraseña Jenkins: {{ lookup('file', '/var/lib/jenkins/secrets/initialAdminPassword', errors='ignore') }}"
+        msg:
+          - "✅ WordPress desplegado correctamente!"
+          - "🌐 Accede a WordPress en: http://{{ ansible_default_ipv4.address }}:8000"
+          - "🔑 Usuario de BD: wp_user | Contraseña: Passw0rd"
+          - "📁 Los datos se guardan en ~/Desktop/wordpress/"
+          - ""
+          - "📝 Comandos útiles dentro de la VM:"
+          - "  docker ps                    # Ver contenedores activos"
+          - "  docker logs wordpress-app    # Ver logs de WordPress"
+          - "  cd ~ && docker-compose down  # Detener WordPress"
+          - "  cd ~ && docker-compose up -d # Reiniciar WordPress"
+       
