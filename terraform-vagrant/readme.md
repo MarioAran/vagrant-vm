@@ -10,9 +10,10 @@
 
 <p align="center">
   <img alt="terraform" src="https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white">
-  <img alt="Github language count" src="https://img.shields.io/github/languages/count/MarioAran/terraform-vagrant?color=56BEB8">
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/MarioAran/terraform-vagrant?color=56BEB8">
-  <img alt="License" src="https://img.shields.io/github/license/MarioAran/terraform-vagrant?color=56BEB8">
+  <img alt="Vagrant" src="https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white">
+  <img alt="Ansible" src="https://img.shields.io/badge/ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white">
+  <img alt="docker" src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img alt="Wordpress" src="https://img.shields.io/badge/wordpress-21759B?style=for-the-badge&logo=wordpress&logoColor=white">
 </p>
 ![Terraform](https://img.shields.io/badge/terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
 ![Vagrant](https://img.shields.io/badge/vagrant-1563FF?style=for-the-badge&logo=vagrant&logoColor=white)
